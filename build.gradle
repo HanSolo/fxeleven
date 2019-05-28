@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin'      version '0.0.7'
+    id 'org.beryx.jlink'               version '2.6.5'
+    id 'com.github.ben-manes.versions' version '0.20.0'
+}
+
+// Application Configuration
+ext {
+    appName       = "FXEleven"
+    appLauncher   = "FXEleven"
+    appPackaging  = "FXEleven"
+    appModuleName = "fxeleven"
+    appMainClass  = "eu.hansolo.fxeleven.Demo"
+}
+
+mainClassName = "${ext.appModuleName}/${appMainClass}"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "eu.hansolo:tilesfx:11.1"
+    compile "eu.hansolo:Medusa:11.1"
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+configurations.all {
+    exclude module: 'hamcrest-core'
+}
+
+javafx {
+    modules = [ 'javafx.controls' ]
+}
+
+jlink {
+    imageZip = project.file("${buildDir}/distributions/${appPackaging}-${javafx.platform.classifier}.zip")
+    options  = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = "${appLauncher}"
+        jvmArgs = ['-Dcom.sun.management.jmxremote', '-Dprism.verbose=true']
+    }
+    addExtraDependencies("javafx")
+    imageName = "${appName}"
+}
+
+
+/*
+implementation group: 'eu.hansolo', name: 'Medusa', version: '11.1', {
+    exclude group: 'org.openjfx'
+}
+*/
+
+
+
+task dist {
+    dependsOn clean, jlinkZip
+    description "Calls clean and then jlinkZip [default]"
+}
+
+defaultTasks 'dist'
